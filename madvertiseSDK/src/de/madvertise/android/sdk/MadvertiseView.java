@@ -156,14 +156,6 @@ public class MadvertiseView extends FrameLayout {
 
     private boolean mIsMraid;
 
-    /**
-     * Static ad cache. We use {@link SoftReference} as they are guaranteed to
-     * be collected before an {@link OutOfMemoryError} occurs. If the app using
-     * this SDK is running out of memory, this cache will be cleared and new ads
-     * will be requested when the layout containing this design is recreated.
-     */
-    private static List<SoftReference<MadvertiseAd>> sCachedAds = new ArrayList<SoftReference<MadvertiseAd>>();
-
     private static boolean reportLauch = true;
 
     private static int sNextCachedAdCounter = -1;
@@ -569,222 +561,206 @@ public class MadvertiseView extends FrameLayout {
 
         MadvertiseUtil.logMessage(null, Log.DEBUG, "Trying to fetch a new ad");
 
-        if (!isTimerRequest) {
-            // get a cached ad (in case of view reorientation).
-            mCurrentAd = getCachedAd();
+        mRequestThread = new Thread(new Runnable() {
+            public void run() {
+                // read all parameters, that we need for the request
+                // get site token from manifest xml file
+                String siteToken = MadvertiseUtil.getToken(
+                        getContext().getApplicationContext(), mCallbackListener);
+                if (siteToken == null) {
+                    siteToken = "";
+                    MadvertiseUtil.logMessage(null, Log.DEBUG,
+                            "Cannot show ads, since the appID ist null");
+                } else {
+                    MadvertiseUtil.logMessage(null, Log.DEBUG, "appID = " + siteToken);
+                }
 
-            try {
-                calculateBannerDimensions();
-            } catch (JSONException e) {
-                // this should never happen
-                e.printStackTrace();
-            }
-        }
+                // create post request
+                HttpPost postRequest = new HttpPost(MadvertiseUtil.MAD_SERVER + "/site/" + siteToken);
+                postRequest.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+                // new ad response version, that supports rich media
+                postRequest.addHeader("Accept", "application/vnd.madad+json; version=3");
+                List<NameValuePair> parameterList = new ArrayList<NameValuePair>();
+                parameterList.add(new BasicNameValuePair("ua", MadvertiseUtil.getUA()));
+                parameterList.add(new BasicNameValuePair("app", "true"));
+                parameterList.add(new BasicNameValuePair("debug", Boolean.toString(mTestMode)));
+                parameterList.add(new BasicNameValuePair("ip", MadvertiseUtil.getLocalIpAddress(mCallbackListener)));
+                parameterList.add(new BasicNameValuePair("format", "json"));
+                parameterList.add(new BasicNameValuePair("requester", "android_sdk"));
+                parameterList.add(new BasicNameValuePair("version", "3.0.1"));
+                parameterList.add(new BasicNameValuePair("banner_type", mBannerType));
+                parameterList.add(new BasicNameValuePair("deliver_only_text", Boolean
+                        .toString(mDeliverOnlyText)));
+                if (sAge != null && !sAge.equals("")) {
+                    parameterList.add(new BasicNameValuePair("age", sAge));
+                }
 
-        if (mCurrentAd != null && !isTimerRequest) {
-            mHandler.post(mUpdateResults);
-        } else {
-            mRequestThread = new Thread(new Runnable() {
-                public void run() {
-                    // read all parameters, that we need for the request
-                    // get site token from manifest xml file
-                    String siteToken = MadvertiseUtil.getToken(
-                            getContext().getApplicationContext(), mCallbackListener);
-                    if (siteToken == null) {
-                        siteToken = "";
-                        MadvertiseUtil.logMessage(null, Log.DEBUG,
-                                "Cannot show ads, since the appID ist null");
-                    } else {
-                        MadvertiseUtil.logMessage(null, Log.DEBUG, "appID = " + siteToken);
-                    }
+                parameterList.add(new BasicNameValuePair("mraid", Boolean.toString(mIsMraid)));
 
-                    // create post request
-                    HttpPost postRequest = new HttpPost(MadvertiseUtil.MAD_SERVER + "/site/" + siteToken);
-                    postRequest.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-                    // new ad response version, that supports rich media
-                    postRequest.addHeader("Accept", "application/vnd.madad+json; version=3");
-                    List<NameValuePair> parameterList = new ArrayList<NameValuePair>();
-                    parameterList.add(new BasicNameValuePair("ua", MadvertiseUtil.getUA()));
-                    parameterList.add(new BasicNameValuePair("app", "true"));
-                    parameterList.add(new BasicNameValuePair("debug", Boolean.toString(mTestMode)));
-                    parameterList.add(new BasicNameValuePair("ip", MadvertiseUtil.getLocalIpAddress(mCallbackListener)));
-                    parameterList.add(new BasicNameValuePair("format", "json"));
-                    parameterList.add(new BasicNameValuePair("requester", "android_sdk"));
-                    parameterList.add(new BasicNameValuePair("version", "3.0"));
-                    parameterList.add(new BasicNameValuePair("banner_type", mBannerType));
-                    parameterList.add(new BasicNameValuePair("deliver_only_text", Boolean
-                            .toString(mDeliverOnlyText)));
-                    if (sAge != null && !sAge.equals("")) {
-                        parameterList.add(new BasicNameValuePair("age", sAge));
-                    }
+                if (sGender != null && !sGender.equals("")) {
+                    parameterList.add(new BasicNameValuePair("gender", sGender));
+                }
+                final Display display = ((WindowManager) getContext().getApplicationContext()
+                        .getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+                String orientation;
+                if (display.getWidth() > display.getHeight()) {
+                    orientation = "landscape";
+                } else {
+                    orientation = "portrait";
+                }
 
-                    parameterList.add(new BasicNameValuePair("mraid", Boolean.toString(mIsMraid)));
+                parameterList.add(new BasicNameValuePair("device_height", Integer.toString(display.getHeight())));
+                parameterList.add(new BasicNameValuePair("device_width", Integer.toString(display.getWidth())));
+                
+                // When the View is first created, the parent does not exist
+                // when this call is made. Hence, we assume that the parent
+                // size is equal the screen size for the first call.
+                if (mParentWidth == 0 && mParentHeight == 0) {
+                    mParentWidth = display.getWidth();
+                    mParentHeight = display.getHeight();
+                }
 
-                    if (sGender != null && !sGender.equals("")) {
-                        parameterList.add(new BasicNameValuePair("gender", sGender));
-                    }
-                    final Display display = ((WindowManager) getContext().getApplicationContext()
-                            .getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-                    String orientation;
-                    if (display.getWidth() > display.getHeight()) {
-                        orientation = "landscape";
-                    } else {
-                        orientation = "portrait";
-                    }
+                parameterList.add(new BasicNameValuePair("parent_height", Integer.toString(mParentHeight)));
+                parameterList.add(new BasicNameValuePair("parent_width", Integer.toString(mParentWidth)));
 
-                    parameterList.add(new BasicNameValuePair("device_height", Integer.toString(display.getHeight())));
-                    parameterList.add(new BasicNameValuePair("device_width", Integer.toString(display.getWidth())));
-                    
-                    // When the View is first created, the parent does not exist
-                    // when this call is made. Hence, we assume that the parent
-                    // size is equal the screen size for the first call.
-                    if (mParentWidth == 0 && mParentHeight == 0) {
-                        mParentWidth = display.getWidth();
-                        mParentHeight = display.getHeight();
-                    }
+                parameterList.add(new BasicNameValuePair("device_orientation", orientation));
+                MadvertiseUtil.refreshCoordinates(getContext().getApplicationContext());
+                if (MadvertiseUtil.getLocation() != null) {
+                    parameterList.add(new BasicNameValuePair("lat", Double
+                            .toString(MadvertiseUtil.getLocation().getLatitude())));
+                    parameterList.add(new BasicNameValuePair("lng", Double
+                            .toString(MadvertiseUtil.getLocation().getLongitude())));
+                }
+                
+                
+                parameterList.add(new BasicNameValuePair("app_name", MadvertiseUtil.getApplicationName(getContext().getApplicationContext())));
+                parameterList.add(new BasicNameValuePair("app_version", MadvertiseUtil.getApplicationVersion(getContext().getApplicationContext())));
+                
+                parameterList.add(new BasicNameValuePair("udid_md5", MadvertiseUtil.getHashedAndroidID(getContext(), MadvertiseUtil.HashType.MD5)));
+                parameterList.add(new BasicNameValuePair("udid_sha1", MadvertiseUtil.getHashedAndroidID(getContext(), MadvertiseUtil.HashType.SHA1)));
+                
+                parameterList.add(new BasicNameValuePair("mac_md5", MadvertiseUtil.getHashedMacAddress(getContext(), MadvertiseUtil.HashType.MD5)));
+                parameterList.add(new BasicNameValuePair("mac_sha1", MadvertiseUtil.getHashedMacAddress(getContext(), MadvertiseUtil.HashType.SHA1)));
 
-                    parameterList.add(new BasicNameValuePair("parent_height", Integer.toString(mParentHeight)));
-                    parameterList.add(new BasicNameValuePair("parent_width", Integer.toString(mParentWidth)));
+                UrlEncodedFormEntity urlEncodedEntity = null;
+                try {
+                    urlEncodedEntity = new UrlEncodedFormEntity(parameterList);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
 
-                    parameterList.add(new BasicNameValuePair("device_orientation", orientation));
-                    MadvertiseUtil.refreshCoordinates(getContext().getApplicationContext());
-                    if (MadvertiseUtil.getLocation() != null) {
-                        parameterList.add(new BasicNameValuePair("lat", Double
-                                .toString(MadvertiseUtil.getLocation().getLatitude())));
-                        parameterList.add(new BasicNameValuePair("lng", Double
-                                .toString(MadvertiseUtil.getLocation().getLongitude())));
-                    }
-                    
-                    
-                    parameterList.add(new BasicNameValuePair("app_name", MadvertiseUtil.getApplicationName(getContext().getApplicationContext())));
-                    parameterList.add(new BasicNameValuePair("app_version", MadvertiseUtil.getApplicationVersion(getContext().getApplicationContext())));
-                    
-                    parameterList.add(new BasicNameValuePair("udid_md5", MadvertiseUtil.getHashedAndroidID(getContext(), MadvertiseUtil.HashType.MD5)));
-                    parameterList.add(new BasicNameValuePair("udid_sha1", MadvertiseUtil.getHashedAndroidID(getContext(), MadvertiseUtil.HashType.SHA1)));
-                    
-                    parameterList.add(new BasicNameValuePair("mac_md5", MadvertiseUtil.getHashedMacAddress(getContext(), MadvertiseUtil.HashType.MD5)));
-                    parameterList.add(new BasicNameValuePair("mac_sha1", MadvertiseUtil.getHashedMacAddress(getContext(), MadvertiseUtil.HashType.SHA1)));
+                postRequest.setEntity(urlEncodedEntity);
 
-                    UrlEncodedFormEntity urlEncodedEntity = null;
+                MadvertiseUtil.logMessage(null, Log.DEBUG, "Post request created");
+                MadvertiseUtil.logMessage(null, Log.DEBUG, "Uri : "
+                        + postRequest.getURI().toASCIIString());
+                MadvertiseUtil.logMessage(
+                        null,
+                        Log.DEBUG,
+                        "All headers : "
+                                + MadvertiseUtil.getAllHeadersAsString(postRequest
+                                        .getAllHeaders()));
+                MadvertiseUtil.logMessage(null, Log.DEBUG, "All request parameters :"
+                        + MadvertiseUtil.printRequestParameters(parameterList));
+
+                synchronized (this) {
+                    // send blocking request to ad server
+                    HttpClient httpClient = new DefaultHttpClient();
+                    HttpResponse httpResponse = null;
+                    InputStream inputStream = null;
+                    JSONObject json = null;
+
                     try {
-                        urlEncodedEntity = new UrlEncodedFormEntity(parameterList);
-                    } catch (UnsupportedEncodingException e) {
+                        HttpParams clientParams = httpClient.getParams();
+                        HttpConnectionParams.setConnectionTimeout(clientParams,
+                                MadvertiseUtil.CONNECTION_TIMEOUT);
+                        HttpConnectionParams.setSoTimeout(clientParams,
+                                MadvertiseUtil.CONNECTION_TIMEOUT);
+
+                        MadvertiseUtil.logMessage(null, Log.DEBUG, "Sending request");
+                        httpResponse = httpClient.execute(postRequest);
+
+                        MadvertiseUtil.logMessage(null, Log.DEBUG, "Response Code => "
+                                + httpResponse.getStatusLine().getStatusCode());
+
+                        String message = "";
+                        if (httpResponse.getLastHeader("X-Madvertise-Debug") != null) {
+                            message = httpResponse.getLastHeader("X-Madvertise-Debug")
+                                    .toString();
+                        }
+
+                        if (mTestMode) {
+                            MadvertiseUtil.logMessage(null, Log.DEBUG,
+                                    "Madvertise Debug Response: " + message);
+                        }
+
+                        int responseCode = httpResponse.getStatusLine().getStatusCode();
+
+                        HttpEntity entity = httpResponse.getEntity();
+
+                        if (responseCode == 200 && entity != null) {
+                            inputStream = entity.getContent();
+                            String resultString = MadvertiseUtil
+                                    .convertStreamToString(inputStream);
+                            MadvertiseUtil.logMessage(null, Log.DEBUG, "Response => "
+                                    + resultString);
+                            json = new JSONObject(resultString);
+                            
+                            // create ad
+                            mCurrentAd = new MadvertiseAd(getContext().getApplicationContext(),
+                                    json, mCallbackListener);
+
+                            calculateBannerDimensions();
+                        } else {
+                            if (mCallbackListener != null) {
+                                mCallbackListener
+                                        .onIllegalHttpStatusCode(responseCode, message);
+                            }
+                        }
+                    } catch (ClientProtocolException e) {
+                        MadvertiseUtil.logMessage(null, Log.DEBUG,
+                                "Error in HTTP request / protocol");
+                        if (mCallbackListener != null) {
+                            mCallbackListener.onError(e);
+                        }
                         e.printStackTrace();
-                    }
-
-                    postRequest.setEntity(urlEncodedEntity);
-
-                    MadvertiseUtil.logMessage(null, Log.DEBUG, "Post request created");
-                    MadvertiseUtil.logMessage(null, Log.DEBUG, "Uri : "
-                            + postRequest.getURI().toASCIIString());
-                    MadvertiseUtil.logMessage(
-                            null,
-                            Log.DEBUG,
-                            "All headers : "
-                                    + MadvertiseUtil.getAllHeadersAsString(postRequest
-                                            .getAllHeaders()));
-                    MadvertiseUtil.logMessage(null, Log.DEBUG, "All request parameters :"
-                            + MadvertiseUtil.printRequestParameters(parameterList));
-
-                    synchronized (this) {
-                        // send blocking request to ad server
-                        HttpClient httpClient = new DefaultHttpClient();
-                        HttpResponse httpResponse = null;
-                        InputStream inputStream = null;
-                        JSONObject json = null;
-
-                        try {
-                            HttpParams clientParams = httpClient.getParams();
-                            HttpConnectionParams.setConnectionTimeout(clientParams,
-                                    MadvertiseUtil.CONNECTION_TIMEOUT);
-                            HttpConnectionParams.setSoTimeout(clientParams,
-                                    MadvertiseUtil.CONNECTION_TIMEOUT);
-
-                            MadvertiseUtil.logMessage(null, Log.DEBUG, "Sending request");
-                            httpResponse = httpClient.execute(postRequest);
-
-                            MadvertiseUtil.logMessage(null, Log.DEBUG, "Response Code => "
-                                    + httpResponse.getStatusLine().getStatusCode());
-
-                            String message = "";
-                            if (httpResponse.getLastHeader("X-Madvertise-Debug") != null) {
-                                message = httpResponse.getLastHeader("X-Madvertise-Debug")
-                                        .toString();
-                            }
-
-                            if (mTestMode) {
-                                MadvertiseUtil.logMessage(null, Log.DEBUG,
-                                        "Madvertise Debug Response: " + message);
-                            }
-
-                            int responseCode = httpResponse.getStatusLine().getStatusCode();
-
-                            HttpEntity entity = httpResponse.getEntity();
-
-                            if (responseCode == 200 && entity != null) {
-                                inputStream = entity.getContent();
-                                String resultString = MadvertiseUtil
-                                        .convertStreamToString(inputStream);
-                                MadvertiseUtil.logMessage(null, Log.DEBUG, "Response => "
-                                        + resultString);
-                                json = new JSONObject(resultString);
-                                
-                                // create ad
-                                mCurrentAd = new MadvertiseAd(getContext().getApplicationContext(),
-                                        json, mCallbackListener);
-
-                                calculateBannerDimensions();
-                            } else {
+                    } catch (IOException e) {
+                        MadvertiseUtil.logMessage(null, Log.DEBUG,
+                                "Could not receive a http response on an ad request");
+                        if (mCallbackListener != null) {
+                            mCallbackListener.onError(e);
+                        }
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        MadvertiseUtil.logMessage(null, Log.DEBUG,
+                                "Could not parse json object");
+                        if (mCallbackListener != null) {
+                            mCallbackListener.onError(e);
+                        }
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        MadvertiseUtil.logMessage(null, Log.DEBUG,
+                                "Could not receive a http response on an ad request");
+                        if (mCallbackListener != null) {
+                            mCallbackListener.onError(e);
+                        }
+                        e.printStackTrace();
+                    } finally {
+                        if (inputStream != null) {
+                            try {
+                                inputStream.close();
+                            } catch (IOException e) {
                                 if (mCallbackListener != null) {
-                                    mCallbackListener
-                                            .onIllegalHttpStatusCode(responseCode, message);
-                                }
-                            }
-                        } catch (ClientProtocolException e) {
-                            MadvertiseUtil.logMessage(null, Log.DEBUG,
-                                    "Error in HTTP request / protocol");
-                            if (mCallbackListener != null) {
-                                mCallbackListener.onError(e);
-                            }
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            MadvertiseUtil.logMessage(null, Log.DEBUG,
-                                    "Could not receive a http response on an ad request");
-                            if (mCallbackListener != null) {
-                                mCallbackListener.onError(e);
-                            }
-                            e.printStackTrace();
-                        } catch (JSONException e) {
-                            MadvertiseUtil.logMessage(null, Log.DEBUG,
-                                    "Could not parse json object");
-                            if (mCallbackListener != null) {
-                                mCallbackListener.onError(e);
-                            }
-                            e.printStackTrace();
-                        } catch (Exception e) {
-                            MadvertiseUtil.logMessage(null, Log.DEBUG,
-                                    "Could not receive a http response on an ad request");
-                            if (mCallbackListener != null) {
-                                mCallbackListener.onError(e);
-                            }
-                            e.printStackTrace();
-                        } finally {
-                            if (inputStream != null) {
-                                try {
-                                    inputStream.close();
-                                } catch (IOException e) {
-                                    if (mCallbackListener != null) {
-                                        mCallbackListener.onError(e);
-                                    }
+                                    mCallbackListener.onError(e);
                                 }
                             }
                         }
                     }
-                    mHandler.post(mUpdateResults);
                 }
-            }, "MadvertiseRequestThread");
-            mRequestThread.start();
-        }
+                mHandler.post(mUpdateResults);
+            }
+        }, "MadvertiseRequestThread");
+        mRequestThread.start();
     }
 
     // used for execution in the ui thread
@@ -999,8 +975,6 @@ public class MadvertiseView extends FrameLayout {
                     // When there is no timer needed, the current request can be
                     // stopped
                     stopRequestThread();
-                    // and the current ad can be cached.
-                    cacheAd(mCurrentAd);
                 }
             }
         }
@@ -1012,59 +986,6 @@ public class MadvertiseView extends FrameLayout {
         mParentWidth = MeasureSpec.getSize(widthMeasureSpec);
         mParentHeight = MeasureSpec.getSize(heightMeasureSpec);
         setMeasuredDimension(mBannerWidth, mBannerHeight);
-    }
-
-    /**
-     * Puts an {@link MadvertiseAd} into the static cache.
-     *
-     * @param ad
-     */
-    private void cacheAd(final MadvertiseAd ad) {
-        if (ad != null) {
-            if (sCachedAds.size() >= MadvertiseUtil.MAX_NUMBER_OF_CACHED_ADS) {
-                sCachedAds.remove(0);
-            }
-            sCachedAds.add(new SoftReference<MadvertiseAd>(ad));
-        }
-    }
-
-    /**
-     * Get a cached {@link MadvertiseAd} that fits the current banner type.
-     *
-     * @return a cached ad
-     */
-    private MadvertiseAd getCachedAd() {
-        int i = 0;
-        if (mBannerType != null && mBannerType.equals(MadvertiseUtil.BANNER_TYPE_ALL)
-                && sCachedAds.size() > 0) {
-            increaseCacheCounter();
-            final SoftReference<MadvertiseAd> adReference = sCachedAds.get(sNextCachedAdCounter);
-            if (adReference != null) {
-                mBannerType = adReference.get().getBannerType();
-                return adReference.get();
-            }
-        } else {
-            while (i < sCachedAds.size()) {
-                increaseCacheCounter();
-                final SoftReference<MadvertiseAd> adReference = sCachedAds
-                        .get(sNextCachedAdCounter);
-                if (adReference != null && adReference.get() != null && mBannerType != null
-                        && mBannerType.contains(adReference.get().getBannerType())) {
-                    mBannerType = adReference.get().getBannerType();
-                    return adReference.get();
-                }
-                i++;
-            }
-        }
-
-        return null;
-    }
-
-    private void increaseCacheCounter() {
-        sNextCachedAdCounter++;
-        if (sNextCachedAdCounter == sCachedAds.size()) {
-            sNextCachedAdCounter = 0;
-        }
     }
 
     /**

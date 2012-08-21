@@ -117,9 +117,6 @@ public class MadvertiseUtil {
 
     static final int TEXT_SIZE_PROVIDER = 10;
 
-    // Up to 4 Ads will be cached
-    static final int MAX_NUMBER_OF_CACHED_ADS = 4;
-
     static final int LANDSCAPE_BANNER_WIDTH = 1024;
 
     static final int PORTRAIT_BANNER_WIDTH = 766;
