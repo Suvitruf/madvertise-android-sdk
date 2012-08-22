@@ -58,7 +58,6 @@ import de.madvertise.android.sdk.MadvertiseUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -124,10 +123,10 @@ public class MadvertiseView extends FrameLayout {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
                 case MAKE_VISIBLE:
-                    setVisibility(View.VISIBLE);
+                	setVisibility(View.VISIBLE);
                     break;
                 case ANIMATION_COMPLETE:
-                    removeOldViews();
+                	removeOldViews();
                     break;
             }
         }
@@ -142,8 +141,8 @@ public class MadvertiseView extends FrameLayout {
 
     private List<View> mOldViews = new ArrayList<View>();
 
-    private AnimationEndListener mAnimationListener = new AnimationEndListener() {
-        public void onAnimationEnd() {
+    private final AnimationEndListener mAnimationListener = new AnimationEndListener() {
+		public void onAnimationEnd() {
             mHandler.sendEmptyMessage(ANIMATION_COMPLETE);
         }
     };
@@ -157,8 +156,6 @@ public class MadvertiseView extends FrameLayout {
     private boolean mIsMraid;
 
     private static boolean reportLauch = true;
-
-    private static int sNextCachedAdCounter = -1;
 
     /**
      * The gender-type of male users
