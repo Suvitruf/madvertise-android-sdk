@@ -34,8 +34,10 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.net.Uri;
 import android.util.Log;
 
 /**
@@ -58,6 +60,8 @@ public class MadvertiseTracker {
      * method <code>reportAction</code> when your app is being launched.
      */
     private static final String ACTION_TYPE_LAUNCH = "launch";
+    
+    private static final String ACTION_TYPE_DOWNLOAD = "download";
 
     /**
      * Action type for the {@link MadvertiseTracker}. Provide this type to the
@@ -105,14 +109,41 @@ public class MadvertiseTracker {
                 Context.MODE_PRIVATE);
     }
 
-    private MadvertiseTracker() {
-    }
-
     /**
      * Reports an an app launch to madvertise.
      */
-    public void reportLaunch() {
-        reportAction(ACTION_TYPE_LAUNCH);
+    public void reportLaunch(String scheme) {
+    	if (isFirstLaunch() && MadvertiseUtil.isConnectionAvailable()) {
+        	
+    		String u5 = MadvertiseUtil.getHashedAndroidID(mContext, MadvertiseUtil.HashType.MD5);
+    		String u1 = MadvertiseUtil.getHashedAndroidID(mContext, MadvertiseUtil.HashType.SHA1);
+    		String m5 = MadvertiseUtil.getHashedMacAddress(mContext, MadvertiseUtil.HashType.MD5);
+    		String m1 = MadvertiseUtil.getHashedMacAddress(mContext, MadvertiseUtil.HashType.SHA1);
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://ad.madvertise.de/sync.html?scheme=" + scheme + "&m1=" + m1 + "&m5=" + m5 + "&u1=" + u1 + "&u5=" + u5));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+
+            try {
+                mContext.startActivity(intent);
+            } catch (Exception e) {
+                MadvertiseUtil.logMessage(null, Log.DEBUG, "Failed to open sync.html.");
+            }
+    	}
+    	else {
+    		reportAction(ACTION_TYPE_LAUNCH);
+    	}
+    }
+    
+    public void reportDownload(Intent intent, String scheme) {
+    	Uri uri = intent.getData();
+        if(uri != null && isFirstLaunch()) {
+        	String url = uri.toString();
+        	reportAction(ACTION_TYPE_DOWNLOAD, url);
+        }
+        else {
+            reportLaunch(scheme);
+        }
     }
 
     /**
@@ -147,6 +178,10 @@ public class MadvertiseTracker {
             return true;
         }
     }
+    
+    private void reportAction(final String actionType) {
+    	reportAction(actionType, null);
+    }
 
     /**
      * Reports an action to madvertise. Provide
@@ -157,13 +192,14 @@ public class MadvertiseTracker {
      * 
      * @param actionType
      */
-    private void reportAction(final String actionType) {
+    private void reportAction(final String actionType, final String tracking_data) {
         if (
         		(
         			actionType.equals(ACTION_TYPE_ACTIVE) ||
         			actionType.equals(ACTION_TYPE_INACTIVE) ||
         			actionType.equals(ACTION_TYPE_LAUNCH) ||
-        			actionType.equals(ACTION_TYPE_STOP)
+        			actionType.equals(ACTION_TYPE_STOP) ||
+        			actionType.equals(ACTION_TYPE_DOWNLOAD)
         		)
         		&&
         		isSessionEnabled()
@@ -199,9 +235,18 @@ public class MadvertiseTracker {
 
                     parameterList.add(new BasicNameValuePair("ts", Long.toString(System
                             .currentTimeMillis())));
-                    parameterList.add(new BasicNameValuePair("at", actionType));
-                    parameterList.add(new BasicNameValuePair("first_launch", Boolean
-                            .toString(isFirstLaunch())));
+                    
+                    boolean shouldCreateFirstLaunchFile = false;
+                    if (actionType.equals(ACTION_TYPE_DOWNLOAD)) {
+                    	parameterList.add(new BasicNameValuePair("at", ACTION_TYPE_LAUNCH));
+                        parameterList.add(new BasicNameValuePair("first_launch", Boolean
+                                .toString(isFirstLaunch())));
+                        parameterList.add(new BasicNameValuePair("tracking_data", tracking_data));
+                        shouldCreateFirstLaunchFile = true;
+                    }
+                    else {
+                    	parameterList.add(new BasicNameValuePair("at", actionType));
+                    }
 
                     parameterList.add(new BasicNameValuePair("app_name", MadvertiseUtil.getApplicationName(mContext.getApplicationContext())));
                     parameterList.add(new BasicNameValuePair("app_version", MadvertiseUtil.getApplicationVersion(mContext.getApplicationContext())));
@@ -256,7 +301,7 @@ public class MadvertiseTracker {
                             HttpEntity entity = httpResponse.getEntity();
 
                             if (responseCode == 200 && entity != null) {
-                                if (isFirstLaunch()) {
+                                if (isFirstLaunch() && shouldCreateFirstLaunchFile) {
                                     onFirstLaunch();
                                 }
                             }
