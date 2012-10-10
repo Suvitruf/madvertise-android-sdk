@@ -119,7 +119,7 @@ public class MadvertiseTracker {
     		String u1 = MadvertiseUtil.getHashedAndroidID(mContext, MadvertiseUtil.HashType.SHA1);
     		String m5 = MadvertiseUtil.getHashedMacAddress(mContext, MadvertiseUtil.HashType.MD5);
     		String m1 = MadvertiseUtil.getHashedMacAddress(mContext, MadvertiseUtil.HashType.SHA1);
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://ad.madvertise.de/sync.html?scheme=" + scheme + "&m1=" + m1 + "&m5=" + m5 + "&u1=" + u1 + "&u5=" + u5));
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(MadvertiseUtil.MAD_SERVER + "/sync.html?scheme=" + scheme + "&m1=" + m1 + "&m5=" + m5 + "&u1=" + u1 + "&u5=" + u5));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
@@ -205,7 +205,8 @@ public class MadvertiseTracker {
         		isSessionEnabled()
            ) {
             new Thread(new Runnable() {
-                public void run() {
+                @Override
+				public void run() {
                     MadvertiseUtil.logMessage(null, Log.DEBUG, "Reporting action " + actionType);
 
                     // read all parameters, that we need for the request
