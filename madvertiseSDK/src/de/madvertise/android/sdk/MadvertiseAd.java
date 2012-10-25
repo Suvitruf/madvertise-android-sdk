@@ -34,6 +34,8 @@ import de.madvertise.android.sdk.MadvertiseUtil;
  * Click action is handled asynchronously.
  */
 public class MadvertiseAd {
+	
+	private final String MARKUP = "markup";
 
     private final String CLICK_URL_CODE = "click_url";
 
@@ -43,6 +45,8 @@ public class MadvertiseAd {
 
     private final String IMPRESSION_TRACKING_ARRAY_CODE = "tracking";
 
+    private String markup;
+    
     private String mClickUrl;
 
     private String mBannerUrl;
@@ -97,6 +101,16 @@ public class MadvertiseAd {
                         + " Value => " + mJsonValues.getString(i));
             }
 
+            markup = MadvertiseUtil.getJSONValue(json, MARKUP);
+            if (null != markup && !markup.equals("")) {
+            	mBannerType =  MadvertiseUtil.BANNER_TYPE_RICH_MEDIA;
+            	mIsMraid = true;
+            	mHasBanner = true;
+                mBannerHeight = Integer.parseInt(MadvertiseUtil.getJSONValue(json, "height"));
+                mBannerWidth = Integer.parseInt(MadvertiseUtil.getJSONValue(json, "width"));
+            	return;
+            }
+            
             // first get not nested values
             mClickUrl = MadvertiseUtil.getJSONValue(json, CLICK_URL_CODE);
             mText = MadvertiseUtil.getJSONValue(json, TEXT_CODE);
@@ -175,6 +189,10 @@ public class MadvertiseAd {
     protected String getClickURL() {
         return mClickUrl;
     }
+    
+    public String getMarkup() {
+        return markup;
+    }
 
     public String getBannerUrl() {
         return mBannerUrl;
@@ -210,5 +228,9 @@ public class MadvertiseAd {
 
     protected boolean isMraid() {
         return mIsMraid;
+    }
+    
+    protected boolean isLoaddableViaMarkup() {
+        return (null != markup && !markup.equals(""));
     }
 }

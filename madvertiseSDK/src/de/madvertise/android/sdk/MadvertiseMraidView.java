@@ -20,8 +20,7 @@
 
 package de.madvertise.android.sdk;
 
-import de.madvertise.android.sdk.MadvertiseView.AnimationEndListener;
-import de.madvertise.android.sdk.MadvertiseView.MadvertiseViewCallbackListener;
+import java.io.IOException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,8 +45,8 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.VideoView;
-
-import java.io.IOException;
+import de.madvertise.android.sdk.MadvertiseView.AnimationEndListener;
+import de.madvertise.android.sdk.MadvertiseView.MadvertiseViewCallbackListener;
 //import android.widget.VideoView;
 
 //import java.io.IOException;
@@ -108,6 +107,24 @@ public class MadvertiseMraidView extends WebView {
 
         setWebViewClient(new WebViewClient() {
             private boolean mError = false;
+            
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, final String url) {
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mListener != null) {
+                            mListener.onAdClicked();
+                        }
+                        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url),
+                                getContext().getApplicationContext(),
+                                MadvertiseActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        getContext().startActivity(intent);
+                    }
+                });
+                return true;
+            }
 
             @Override
             public void onPageFinished(WebView view, String url) {
@@ -137,8 +154,7 @@ public class MadvertiseMraidView extends WebView {
         this.setWebChromeClient(new WebChromeClient() {
 
             @Override
-            public void onShowCustomView(View view, CustomViewCallback callback)
-            {
+            public void onShowCustomView(View view, CustomViewCallback callback) {
                 MadvertiseUtil.logMessage(null, Log.INFO, "showing VideoView");
                 super.onShowCustomView(view, callback);
                 if (view instanceof FrameLayout) {
@@ -192,10 +208,13 @@ public class MadvertiseMraidView extends WebView {
     }
 
     protected void loadAd(MadvertiseAd ad) {
-        loadAd(ad.getBannerUrl());
-    }
-
-    protected void loadAd(String url) {
+    	if (ad.isLoaddableViaMarkup()) {
+    		loadDataWithBaseURL(null, ad.getMarkup(), "text/html", "utf-8", null);
+    		return;
+    	}
+    	
+    	String url = ad.getBannerUrl();
+    		
         MadvertiseUtil.logMessage(null, Log.INFO, "loading html Ad: " + url);
 
         if (mraidJS == null) {
