@@ -66,11 +66,11 @@ public class OverlayActivity extends Activity implements MadvertiseViewCallbackL
     @Override
     protected void onResume() {
     	super .onResume();
-    	
+
     	// Report that the application was downloaded
-    	mTracker.reportDownload(getIntent(), "mad-TestTokn");
+    	mTracker.reportDownload(getIntent(), "myappname");
     }
-    
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -89,7 +89,7 @@ public class OverlayActivity extends Activity implements MadvertiseViewCallbackL
 
     /**
      * Notifies the listener on success or failure
-     * 
+     *
      * @param succeed true, if an ad could be loading, else false
      * @param madView specified view
      */
