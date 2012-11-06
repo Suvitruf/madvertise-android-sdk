@@ -53,9 +53,6 @@ public class OverlayActivity extends Activity implements MadvertiseViewCallbackL
 
         // Retrieve a new instance of the a MadvertiseTracker
          mTracker = MadvertiseTracker.getInstance(this);
-
-        // Report the application's start.
-         mTracker.reportLaunch();
     }
 
     @Override
@@ -64,6 +61,14 @@ public class OverlayActivity extends Activity implements MadvertiseViewCallbackL
 
         // Report that the application becomes active
         mTracker.reportActive();
+    }
+
+    @Override
+    protected void onResume() {
+    	super.onResume();
+
+    	// Report that the application was downloaded
+    	mTracker.reportDownload(getIntent(), "myappname");
     }
 
     @Override
@@ -84,7 +89,7 @@ public class OverlayActivity extends Activity implements MadvertiseViewCallbackL
 
     /**
      * Notifies the listener on success or failure
-     * 
+     *
      * @param succeed true, if an ad could be loading, else false
      * @param madView specified view
      */

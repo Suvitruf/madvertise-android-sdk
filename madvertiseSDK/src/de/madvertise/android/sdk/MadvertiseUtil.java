@@ -37,19 +37,21 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings.Secure;
 import android.util.Log;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -427,7 +429,8 @@ public class MadvertiseUtil {
             final LocationManager finalizedLocationManager = locationManager;
             sLocationUpdateTimestamp = System.currentTimeMillis();
             locationManager.requestLocationUpdates(provider, 0, 0, new LocationListener() {
-                public void onLocationChanged(Location location) {
+                @Override
+				public void onLocationChanged(Location location) {
                 	MadvertiseUtil.logMessage(null, Log.DEBUG, "Refreshing location");
                     sCurrentLocation = location;
                     sLocationUpdateTimestamp = System.currentTimeMillis();
@@ -436,13 +439,16 @@ public class MadvertiseUtil {
                 }
 
                 // not used yet
-                public void onProviderDisabled(String provider) {
+                @Override
+				public void onProviderDisabled(String provider) {
                 }
 
-                public void onProviderEnabled(String provider) {
+                @Override
+				public void onProviderEnabled(String provider) {
                 }
 
-                public void onStatusChanged(String provider, int status, Bundle extras) {
+                @Override
+				public void onStatusChanged(String provider, int status, Bundle extras) {
                 }
             }, context.getMainLooper());
         }
@@ -623,7 +629,37 @@ public class MadvertiseUtil {
         return res;
     }
 
+    public static boolean isConnectionAvailable() {
+        class NetworkCheckTask extends AsyncTask<Void, Void, Boolean> {
 
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                try {
+                    URL url = new URL(MAD_SERVER + "/sync.html");
+                    HttpURLConnection conn = null;
+                    conn = (HttpURLConnection) url.openConnection();
+                    conn.setConnectTimeout(999);
+                    conn.setRequestMethod("GET");
+                    conn.setDoInput(true);
+                    conn.connect();
+                    if (conn.getResponseCode() == 200)
+                        return true;
+                    else
+                        return false;
+                } catch (Exception e) {
+                    return false;
+                }
+            }
 
+        }
+
+        try {
+            NetworkCheckTask async = new NetworkCheckTask();
+            async.execute();
+            return async.get();
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
 }

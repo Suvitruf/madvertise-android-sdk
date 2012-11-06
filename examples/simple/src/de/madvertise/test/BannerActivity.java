@@ -85,10 +85,15 @@ public class BannerActivity extends Activity implements MadvertiseViewCallbackLi
         listView.setAdapter(adapter);
 
         // Retrieve a new instance of the a MadvertiseTracker
-         mTracker = MadvertiseTracker.getInstance(this);
+        mTracker = MadvertiseTracker.getInstance(this);
+    }
 
-        // Report the application's start.
-         mTracker.reportLaunch();
+    @Override
+    protected void onResume() {
+    	super.onResume();
+
+    	// Report that the application was downloaded
+    	mTracker.reportDownload(getIntent(), "myappname");
     }
 
     @Override
@@ -117,7 +122,7 @@ public class BannerActivity extends Activity implements MadvertiseViewCallbackLi
 
     /**
      * Notifies the listener on success or failure
-     * 
+     *
      * @param succeed true, if an ad could be loading, else false
      * @param madView specified view
      */
