@@ -16,6 +16,14 @@
 
 package de.madvertise.android.sdk;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -53,15 +61,6 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
-import de.madvertise.android.sdk.MadvertiseUtil;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class MadvertiseView extends FrameLayout {
 
@@ -186,12 +185,6 @@ public class MadvertiseView extends FrameLayout {
         super(context, attrs);
 
         MadvertiseUtil.logMessage(null, Log.DEBUG, "** Constructor for mad view called **");
-
-        // report launch
-        if (reportLauch) {
-            MadvertiseTracker.getInstance(context).reportLaunch();
-            reportLauch = false;
-        }
 
         // We use GONE instead of INVISIBLE because GONE doesn't allocate space
         // in
@@ -584,7 +577,7 @@ public class MadvertiseView extends FrameLayout {
                 parameterList.add(new BasicNameValuePair("ip", MadvertiseUtil.getLocalIpAddress(mCallbackListener)));
                 parameterList.add(new BasicNameValuePair("format", "json"));
                 parameterList.add(new BasicNameValuePair("requester", "android_sdk"));
-                parameterList.add(new BasicNameValuePair("version", "3.1.0"));
+                parameterList.add(new BasicNameValuePair("version", "3.1.1"));
                 parameterList.add(new BasicNameValuePair("banner_type", mBannerType));
                 parameterList.add(new BasicNameValuePair("deliver_only_text", Boolean
                         .toString(mDeliverOnlyText)));

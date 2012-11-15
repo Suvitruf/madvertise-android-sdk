@@ -1,4 +1,4 @@
-h1. madvertise Android SDK (v3.0.1)
+h1. madvertise Android SDK (v3.1)
 
 h2. Intro
 
@@ -77,6 +77,32 @@ The sizes are: mma 320x53, leaderboard 728x90, fullcreen 768x768, portrait 766x6
 ## <code>deliverOnlyText [true|false]</code>, whether your ad only displays text or not. This only has effect on mma type banners.
 ## <code>placement_type [inline|interstitial]</code>, only for mraid ads, default is inline. When declaring the placement_type as interstitial, you have to place your ad in a way that it is always visible, or, in other words, can not be scrolled out of the visible part of the screen. Basically interstitial ads do always have a close button, whereas inline ads might have none (if so, it's provided by the ad itself).
 ## <code>mraid [boolean]</code>, whether you want to display rich media ads or not, default is true. Please make sure to overwrite onApplicationPause() and onApplicationResume() in your MadvertiseCallbackListener appropriately when setting this flag to true. MRAID ads will have the initial size defined with the parameter "bannerType" (see above). They can expand on a click (expanded is defined by the ad itself, which might be fullscreen).
+
+h2. Using the SDK to track download conversions
+
+The madvertise Android SDK allows advertisers to create a powerful link between ads running on the madvertise network and their own apps. The integration in your app is done by the following steps:
+
+* Edit your AndroidManifest.xml file and add an intent filter within your main activity
+<pre lang="xml"><code>
+<intent-filter>
+  <action android:name="android.intent.action.VIEW" />
+  <category android:name="android.intent.category.DEFAULT" />
+  <category android:name="android.intent.category.BROWSABLE" />
+  <data android:scheme="myappname" />
+</intent-filter>
+</code></pre>
+* IMPORTANT
+** Notice that andoid:scheme has to be unique to prevent interactions with other apps.
+** Do not use special chars or numbers as first char
+* Add or create the following method in your main
+<pre lang="java"><code>
+@Override
+  protected void onResume() {
+  super.onResume();
+  // Report that the application was downloaded
+  mTracker.reportDownload(getIntent(), "myappname"); // second param should be the same as android:scheme
+}
+</code></pre>
 
 h2. Sample App
 

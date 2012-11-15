@@ -16,10 +16,16 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="mad-TestTokn" />
+            </intent-filter>
         </activity>
         
         <!-- open external urls -->
-        <activity android:name="de.madvertise.android.sdk.MadvertiseActivity"/>
+        <activity android:name="de.madvertise.android.sdk.MadvertiseActivity" />
         
         <!-- Setup your site token. For tests, use 'TestTokn'-->
         <meta-data android:value="TestTokn" android:name="madvertise_site_token" />
