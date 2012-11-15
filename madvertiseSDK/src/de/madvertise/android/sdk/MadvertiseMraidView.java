@@ -208,21 +208,21 @@ public class MadvertiseMraidView extends WebView {
     }
 
     protected void loadAd(MadvertiseAd ad) {
-    	if (ad.isLoaddableViaMarkup()) {
-    		loadDataWithBaseURL(null, ad.getMarkup(), "text/html", "utf-8", null);
-    		return;
-    	}
-    	
-    	String url = ad.getBannerUrl();
-    		
-        MadvertiseUtil.logMessage(null, Log.INFO, "loading html Ad: " + url);
-
         if (mraidJS == null) {
             mraidJS = MadvertiseUtil.convertStreamToString(getContext().getResources()
                     .openRawResource(de.madvertise.android.sdk.R.raw.mraid));
         }
 
         loadUrl("javascript:" + mraidJS);
+    	
+    	if (ad.isLoaddableViaMarkup()) {
+    		MadvertiseUtil.logMessage(null, Log.INFO, "loading html Ad via markup");
+    		loadDataWithBaseURL("http://www.madvertise.com", ad.getMarkup(), "text/html", "utf-8", null);
+    		return;
+    	}
+    	
+    	String url = ad.getBannerUrl();
+    	MadvertiseUtil.logMessage(null, Log.INFO, "loading html Ad: " + url);
 
         if (url.endsWith(".js")) {
             final int lastIndex = url.lastIndexOf("/");

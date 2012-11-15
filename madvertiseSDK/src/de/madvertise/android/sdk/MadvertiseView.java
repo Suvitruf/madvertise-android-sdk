@@ -708,6 +708,8 @@ public class MadvertiseView extends FrameLayout {
                                     json, mCallbackListener);
 
                             calculateBannerDimensions();
+                            
+                            mHandler.post(mUpdateResults);
                         } else {
                             if (mCallbackListener != null) {
                                 mCallbackListener
@@ -754,7 +756,6 @@ public class MadvertiseView extends FrameLayout {
                         }
                     }
                 }
-                mHandler.post(mUpdateResults);
             }
         }, "MadvertiseRequestThread");
         mRequestThread.start();
@@ -768,57 +769,59 @@ public class MadvertiseView extends FrameLayout {
     };
 
     private void calculateBannerDimensions() throws JSONException {
-    	if (mCurrentAd != null) {
-    		mBannerType = mCurrentAd.getBannerType();
+    	if (mCurrentAd == null || mCurrentAd.getBannerType() == null) {
+    		return;
     	}
+    	
+    	String bannerType = mCurrentAd.getBannerType();
+    	
         // set the banner width and height
-    	if (mBannerType != null) {
-	        if (mBannerType.contains(MadvertiseUtil.BANNER_TYPE_MEDIUM_RECTANGLE)) {
-	            mBannerHeight = (int) (mDp * MadvertiseUtil.MEDIUM_RECTANGLE_BANNER_HEIGHT + 0.5f);
-	            mBannerWidth = (int) (mDp * MadvertiseUtil.MEDIUM_RECTANGLE_BANNER_WIDTH + 0.5f);
-	            mBannerHeightDp = MadvertiseUtil.MEDIUM_RECTANGLE_BANNER_HEIGHT;
-	            mBannerWidthDp = MadvertiseUtil.MEDIUM_RECTANGLE_BANNER_WIDTH;
-	        } else if (mBannerType.contains(MadvertiseUtil.BANNER_TYPE_MMA)) {
-	            mBannerHeight = (int) (mDp * MadvertiseUtil.MMA_BANNER_HEIGHT + 0.5f);
-	            mBannerWidth = (int) (mDp * MadvertiseUtil.MMA_BANNER_WIDTH + 0.5f);
-	            mBannerHeightDp = MadvertiseUtil.MMA_BANNER_HEIGHT;
-	            mBannerWidthDp = MadvertiseUtil.MMA_BANNER_WIDTH;
-	        } else if (mBannerType.contains(MadvertiseUtil.BANNER_TYPE_FULLSCREEN)) {
-	            mBannerHeight = (int) (mDp * MadvertiseUtil.FULLSCREEN_BANNER_HEIGHT + 0.5f);
-	            mBannerWidth = (int) (mDp * MadvertiseUtil.FULLSCREEN_BANNER_WIDTH + 0.5f);
-	            mBannerHeightDp = MadvertiseUtil.FULLSCREEN_BANNER_HEIGHT;
-	            mBannerWidthDp = MadvertiseUtil.FULLSCREEN_BANNER_WIDTH;
-	        } else if (mBannerType.contains(MadvertiseUtil.BANNER_TYPE_LANDSCAPE)) {
-	            mBannerHeight = (int) (mDp * MadvertiseUtil.LANDSCAPE_BANNER_HEIGHT + 0.5f);
-	            mBannerWidth = (int) (mDp * MadvertiseUtil.LANDSCAPE_BANNER_WIDTH + 0.5f);
-	            mBannerHeightDp = MadvertiseUtil.LANDSCAPE_BANNER_HEIGHT;
-	            mBannerWidthDp = MadvertiseUtil.LANDSCAPE_BANNER_WIDTH;
-	        } else if (mBannerType.contains(MadvertiseUtil.BANNER_TYPE_LEADERBOARD)) {
-	            mBannerHeight = (int) (mDp * MadvertiseUtil.LEADERBOARD_BANNER_HEIGHT + 0.5f);
-	            mBannerWidth = (int) (mDp * MadvertiseUtil.LEADERBOARD_BANNER_WIDTH + 0.5f);
-	            mBannerHeightDp = MadvertiseUtil.LEADERBOARD_BANNER_HEIGHT;
-	            mBannerWidthDp = MadvertiseUtil.LEADERBOARD_BANNER_WIDTH;
-	        } else if (mBannerType.contains(MadvertiseUtil.BANNER_TYPE_PORTRAIT)) {
-	            mBannerHeight = (int) (mDp * MadvertiseUtil.PORTRAIT_BANNER_HEIGHT + 0.5f);
-	            mBannerWidth = (int) (mDp * MadvertiseUtil.PORTRAIT_BANNER_WIDTH + 0.5f);
-	            mBannerHeightDp = MadvertiseUtil.PORTRAIT_BANNER_HEIGHT;
-	            mBannerWidthDp = MadvertiseUtil.PORTRAIT_BANNER_WIDTH;
-	        } else if (mBannerType.contains(MadvertiseUtil.BANNER_TYPE_RICH_MEDIA) && mCurrentAd != null && mCurrentAd.isMraid()) {
-	        	// If we had chained banner types with mraid=true and actually get a rich media ad, we don't know how big it should be in default mode.
-	        	// So we need to check the parsed ad-response from the server.
-	        	mBannerHeightDp = mCurrentAd.getBannerHeight();
-	        	mBannerWidthDp = mCurrentAd.getBannerWidth();
-	        	mBannerHeight = (int) (mDp * mBannerHeightDp + 0.5f);
-	            mBannerWidth = (int) (mDp * mBannerWidthDp + 0.5f);
-	        } else if (mBannerType.contains(MadvertiseUtil.BANNER_TYPE_RICH_MEDIA) && mCurrentAd != null && !mCurrentAd.isMraid()) {
-	        	// banner type = rich_media, but no mraid, take fullscreen
-	        	// actually same logic as for mraid
-	        	mBannerHeightDp = mCurrentAd.getBannerHeight();
-	        	mBannerWidthDp = mCurrentAd.getBannerWidth();
-	        	mBannerHeight = (int) (mDp * mBannerHeightDp + 0.5f);
-	            mBannerWidth = (int) (mDp * mBannerWidthDp + 0.5f);
-	        }
-    	}
+        if (bannerType.equals(MadvertiseUtil.BANNER_TYPE_MEDIUM_RECTANGLE)) {
+            mBannerHeight = (int) (mDp * MadvertiseUtil.MEDIUM_RECTANGLE_BANNER_HEIGHT + 0.5f);
+            mBannerWidth = (int) (mDp * MadvertiseUtil.MEDIUM_RECTANGLE_BANNER_WIDTH + 0.5f);
+            mBannerHeightDp = MadvertiseUtil.MEDIUM_RECTANGLE_BANNER_HEIGHT;
+            mBannerWidthDp = MadvertiseUtil.MEDIUM_RECTANGLE_BANNER_WIDTH;
+        } else if (bannerType.equals(MadvertiseUtil.BANNER_TYPE_MMA)) {
+            mBannerHeight = (int) (mDp * MadvertiseUtil.MMA_BANNER_HEIGHT + 0.5f);
+            mBannerWidth = (int) (mDp * MadvertiseUtil.MMA_BANNER_WIDTH + 0.5f);
+            mBannerHeightDp = MadvertiseUtil.MMA_BANNER_HEIGHT;
+            mBannerWidthDp = MadvertiseUtil.MMA_BANNER_WIDTH;
+        } else if (bannerType.equals(MadvertiseUtil.BANNER_TYPE_FULLSCREEN)) {
+            mBannerHeight = (int) (mDp * MadvertiseUtil.FULLSCREEN_BANNER_HEIGHT + 0.5f);
+            mBannerWidth = (int) (mDp * MadvertiseUtil.FULLSCREEN_BANNER_WIDTH + 0.5f);
+            mBannerHeightDp = MadvertiseUtil.FULLSCREEN_BANNER_HEIGHT;
+            mBannerWidthDp = MadvertiseUtil.FULLSCREEN_BANNER_WIDTH;
+        } else if (bannerType.equals(MadvertiseUtil.BANNER_TYPE_LANDSCAPE)) {
+            mBannerHeight = (int) (mDp * MadvertiseUtil.LANDSCAPE_BANNER_HEIGHT + 0.5f);
+            mBannerWidth = (int) (mDp * MadvertiseUtil.LANDSCAPE_BANNER_WIDTH + 0.5f);
+            mBannerHeightDp = MadvertiseUtil.LANDSCAPE_BANNER_HEIGHT;
+            mBannerWidthDp = MadvertiseUtil.LANDSCAPE_BANNER_WIDTH;
+        } else if (bannerType.equals(MadvertiseUtil.BANNER_TYPE_LEADERBOARD)) {
+            mBannerHeight = (int) (mDp * MadvertiseUtil.LEADERBOARD_BANNER_HEIGHT + 0.5f);
+            mBannerWidth = (int) (mDp * MadvertiseUtil.LEADERBOARD_BANNER_WIDTH + 0.5f);
+            mBannerHeightDp = MadvertiseUtil.LEADERBOARD_BANNER_HEIGHT;
+            mBannerWidthDp = MadvertiseUtil.LEADERBOARD_BANNER_WIDTH;
+        } else if (bannerType.equals(MadvertiseUtil.BANNER_TYPE_PORTRAIT)) {
+            mBannerHeight = (int) (mDp * MadvertiseUtil.PORTRAIT_BANNER_HEIGHT + 0.5f);
+            mBannerWidth = (int) (mDp * MadvertiseUtil.PORTRAIT_BANNER_WIDTH + 0.5f);
+            mBannerHeightDp = MadvertiseUtil.PORTRAIT_BANNER_HEIGHT;
+            mBannerWidthDp = MadvertiseUtil.PORTRAIT_BANNER_WIDTH;
+        } else if (bannerType.equals(MadvertiseUtil.BANNER_TYPE_RICH_MEDIA) && mCurrentAd.isMraid()) {
+        	// If we had chained banner types with mraid=true and actually get a rich media ad, we don't know how big it should be in default mode.
+        	// So we need to check the parsed ad-response from the server.
+        	mBannerHeightDp = mCurrentAd.getBannerHeight();
+        	mBannerWidthDp = mCurrentAd.getBannerWidth();
+        	mBannerHeight = (int) (mDp * mBannerHeightDp + 0.5f);
+            mBannerWidth = (int) (mDp * mBannerWidthDp + 0.5f);
+        } else if (bannerType.equals(MadvertiseUtil.BANNER_TYPE_RICH_MEDIA) && mCurrentAd != null && !mCurrentAd.isMraid()) {
+        	// banner type = rich_media, but no mraid, take fullscreen
+        	// actually same logic as for mraid
+        	mBannerHeightDp = mCurrentAd.getBannerHeight();
+        	mBannerWidthDp = mCurrentAd.getBannerWidth();
+        	mBannerHeight = (int) (mDp * mBannerHeightDp + 0.5f);
+            mBannerWidth = (int) (mDp * mBannerWidthDp + 0.5f);
+        }
+	        
         // adjust width and height to fit the screen
         final DisplayMetrics displayMetrics = getContext()
                 .getApplicationContext().getResources().getDisplayMetrics();
@@ -833,7 +836,7 @@ public class MadvertiseView extends FrameLayout {
         }
 
         // fullscreen is a square so we have special treatment here
-        if (mBannerType != null && mBannerType.equals(MadvertiseUtil.BANNER_TYPE_FULLSCREEN)) {
+        if (bannerType.equals(MadvertiseUtil.BANNER_TYPE_FULLSCREEN)) {
             if (tempHeight < tempWidth) {
                 mBannerWidth = tempHeight;
                 mBannerHeight = tempHeight;
