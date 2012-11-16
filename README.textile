@@ -1,4 +1,4 @@
-h1. madvertise Android SDK (v3.1)
+h1. madvertise Android SDK (v3.1.1)
 
 h2. Intro
 

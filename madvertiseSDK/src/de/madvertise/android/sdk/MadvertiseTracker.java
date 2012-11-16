@@ -242,8 +242,18 @@ public class MadvertiseTracker {
                     	parameterList.add(new BasicNameValuePair("at", ACTION_TYPE_LAUNCH));
                         parameterList.add(new BasicNameValuePair("first_launch", Boolean
                                 .toString(isFirstLaunch())));
-                        parameterList.add(new BasicNameValuePair("tracking_data", tracking_data));
-                        shouldCreateFirstLaunchFile = true;
+                        String[] tracking_params = tracking_data.split("&");
+                        if (tracking_params.length > 0)
+                        {
+                        	parameterList.add(new BasicNameValuePair("tracking_data", tracking_params[0]));
+                        	String[] data;
+                        	for(int i = 1; i < tracking_params.length; i++)
+                        	{
+                        		data = tracking_params[i].split("=");
+                        		parameterList.add(new BasicNameValuePair(data[0], data[1]));
+                        	}
+                        	shouldCreateFirstLaunchFile = true;                        	
+                        }
                     }
                     else {
                     	parameterList.add(new BasicNameValuePair("at", actionType));
