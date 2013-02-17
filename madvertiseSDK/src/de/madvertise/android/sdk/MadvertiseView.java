@@ -217,8 +217,9 @@ public class MadvertiseView extends FrameLayout {
                 + displayMetrics.widthPixels + " ; Height = " + displayMetrics.heightPixels);
 
         mInitialBackground = this.getBackground();
-        Rect r = new Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
         if (sTextBannerBackground == null) {
+            // See https://github.com/madvertise/madvertise-android-sdk/pull/16
+            Rect r = new Rect(0, 0, 1, displayMetrics.heightPixels);
             sTextBannerBackground = generateBackgroundDrawable(r, mBackgroundColor, 0xffffff);
         }
 
