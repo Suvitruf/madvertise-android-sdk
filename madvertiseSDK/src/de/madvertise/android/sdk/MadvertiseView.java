@@ -993,6 +993,17 @@ public class MadvertiseView extends FrameLayout {
             mMraidView.setPlacementType(placementType);
         }
     }
+    
+    
+    /**
+     * Sets the banner type.
+     * 
+     * @param bannerType
+     *            See {@link MadvertiseUtil} constants for valid values
+     */
+    public void setBannerType(String bannerType) {
+        mBannerType = bannerType;
+    }
 
     /**
      * Set the gender of your app's user.

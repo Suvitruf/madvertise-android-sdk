@@ -75,7 +75,7 @@ public class MadvertiseUtil {
 
     static final boolean PRINT_LOG = true;
 
-	 static final String MAD_SERVER = "http://ad.madvertise.de";
+	static final String MAD_SERVER = "http://ad.madvertise.de";
 
     static final int CONNECTION_TIMEOUT = 5000;
 
@@ -85,23 +85,28 @@ public class MadvertiseUtil {
 
     static final String BANNER_TYPE_MEDIUM_RECTANGLE = "medium_rectangle";
 
-    static final String BANNER_TYPE_MMA = "mma";
+    /** 320×53 */
+    public static final String BANNER_TYPE_MMA = "mma";
 
-    static final String BANNER_TYPE_LEADERBOARD = "leaderboard";
+    /** 728×90 */
+    public static final String BANNER_TYPE_LEADERBOARD = "leaderboard";
 
-    static final String BANNER_TYPE_FULLSCREEN = "fullscreen";
+    /** 768×768 */
+    public static final String BANNER_TYPE_FULLSCREEN = "fullscreen";
 
-    static final String BANNER_TYPE_PORTRAIT = "portrait";
+    /** 766×66 */
+    public static final String BANNER_TYPE_PORTRAIT = "portrait";
 
-    static final String BANNER_TYPE_LANDSCAPE = "landscape";
+    /** 1024×66 */
+    public static final String BANNER_TYPE_LANDSCAPE = "landscape";
 
-    static final String BANNER_TYPE_ALL = "all";
+    public static final String BANNER_TYPE_ALL = "all";
 
-    static final String BANNER_TYPE_RICH_MEDIA = "rich_media";
+    public static final String BANNER_TYPE_RICH_MEDIA = "rich_media";
 
-    static final String BANNER_TYPE_RICH_MEDIA_SHORT = "rm";
+    public static final String BANNER_TYPE_RICH_MEDIA_SHORT = "rm";
 
-    static final String BANNER_TYPE_DEFAULT = BANNER_TYPE_MMA;
+    public static final String BANNER_TYPE_DEFAULT = BANNER_TYPE_MMA;
 
     static final String ANIMATION_TYPE_LEFT_TO_RIGHT = "left_to_right";
 
