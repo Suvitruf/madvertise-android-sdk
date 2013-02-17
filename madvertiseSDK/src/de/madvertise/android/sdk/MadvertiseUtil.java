@@ -542,7 +542,8 @@ public class MadvertiseUtil {
      * @see android.util.Log
      */
     public static void logMessage(final String tag, final int level, String message) {
-        logMessage(tag, level, message, null);
+        StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[3];
+        logMessage(tag, level, message, null, stackTraceElement);
     }
 
     /**
@@ -560,6 +561,11 @@ public class MadvertiseUtil {
      * @see android.util.Log
      */
     public static void logMessage(final String tag, final int level, String message, Throwable throwable) {
+        StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[3];
+        logMessage(tag, level, message, throwable, stackTraceElement);
+    }
+    
+    static void logMessage(final String tag, final int level, String message, Throwable throwable, StackTraceElement stackTraceElement) {
         String logTag = tag;
         if (!PRINT_LOG) {
             return;
@@ -573,7 +579,6 @@ public class MadvertiseUtil {
             message = "";
         }
 
-        StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[3];
         String fullClassName = stackTraceElement.getClassName();
         String className = fullClassName.substring(fullClassName.lastIndexOf(".") + 1);
         int lineNumber = stackTraceElement.getLineNumber();
