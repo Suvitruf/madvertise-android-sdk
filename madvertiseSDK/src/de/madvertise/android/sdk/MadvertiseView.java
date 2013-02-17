@@ -516,12 +516,7 @@ public class MadvertiseView extends FrameLayout {
             MadvertiseUtil.logMessage(null, Log.DEBUG, "Refresh intervall must be higher than 60");
         }
 
-        try {
-            calculateBannerDimensions();
-        } catch (JSONException e) {
-            // this should never happen
-            e.printStackTrace();
-        }
+        calculateBannerDimensions();
 
         MadvertiseUtil.logMessage(null, Log.DEBUG, "Using following attributes values:");
         MadvertiseUtil.logMessage(null, Log.DEBUG, " testMode = " + mTestMode);
@@ -637,7 +632,7 @@ public class MadvertiseView extends FrameLayout {
                 try {
                     urlEncodedEntity = new UrlEncodedFormEntity(parameterList);
                 } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
 
                 postRequest.setEntity(urlEncodedEntity);
@@ -762,7 +757,7 @@ public class MadvertiseView extends FrameLayout {
         }
     };
 
-    private void calculateBannerDimensions() throws JSONException {
+    private void calculateBannerDimensions() {
     	if (mCurrentAd == null || mCurrentAd.getBannerType() == null) {
     		return;
     	}
