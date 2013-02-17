@@ -707,32 +707,28 @@ public class MadvertiseView extends FrameLayout {
                         }
                     } catch (ClientProtocolException e) {
                         MadvertiseUtil.logMessage(null, Log.DEBUG,
-                                "Error in HTTP request / protocol");
+                                "Error in HTTP request / protocol", e);
                         if (mCallbackListener != null) {
                             mCallbackListener.onError(e);
                         }
-                        e.printStackTrace();
                     } catch (IOException e) {
                         MadvertiseUtil.logMessage(null, Log.DEBUG,
-                                "Could not receive a http response on an ad request");
+                                "Could not receive a http response on an ad request", e);
                         if (mCallbackListener != null) {
                             mCallbackListener.onError(e);
                         }
-                        e.printStackTrace();
                     } catch (JSONException e) {
                         MadvertiseUtil.logMessage(null, Log.DEBUG,
-                                "Could not parse json object");
+                                "Could not parse json object", e);
                         if (mCallbackListener != null) {
                             mCallbackListener.onError(e);
                         }
-                        e.printStackTrace();
                     } catch (Exception e) {
                         MadvertiseUtil.logMessage(null, Log.DEBUG,
-                                "Could not receive a http response on an ad request");
+                                "Could not receive a http response on an ad request", e);
                         if (mCallbackListener != null) {
                             mCallbackListener.onError(e);
                         }
-                        e.printStackTrace();
                     } finally {
                         if (inputStream != null) {
                             try {

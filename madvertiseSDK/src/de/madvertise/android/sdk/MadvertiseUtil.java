@@ -75,7 +75,7 @@ public class MadvertiseUtil {
 
     static final boolean PRINT_LOG = true;
 
-	static final String MAD_SERVER = "http://ad.madvertise.de";
+    static final String MAD_SERVER = "http://ad.madvertise.de";
 
     static final int CONNECTION_TIMEOUT = 5000;
 
@@ -165,12 +165,11 @@ public class MadvertiseUtil {
     private static Location sCurrentLocation = null;
 
     public enum HashType {
-    	MD5,
-    	SHA1
+        MD5, SHA1
     }
 
     public static String getHashedAndroidID(Context context, HashType hashType) {
-    	String id = Secure.getString(context.getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
+        String id = Secure.getString(context.getApplicationContext().getContentResolver(), Secure.ANDROID_ID);
         if (id == null) {
             id = "";
         } else {
@@ -180,26 +179,27 @@ public class MadvertiseUtil {
     }
 
     public static String getHashedMacAddress(Context context, HashType hashType) {
-    	String mac = null;
+        String mac = null;
 
-    	if (MadvertiseUtil.checkPermissionGranted(android.Manifest.permission.ACCESS_WIFI_STATE, context)) {
-    		WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-    		mac = wm.getConnectionInfo().getMacAddress();
-    	}
+        if (MadvertiseUtil.checkPermissionGranted(android.Manifest.permission.ACCESS_WIFI_STATE, context)) {
+            WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            mac = wm.getConnectionInfo().getMacAddress();
+        }
 
-    	if (mac == null) {
-    		mac = "";
-    	} else {
-    		mac = MadvertiseUtil.getHash(mac, hashType);
-    	}
+        if (mac == null) {
+            mac = "";
+        } else {
+            mac = MadvertiseUtil.getHash(mac, hashType);
+        }
 
-    	return mac;
+        return mac;
     }
 
     /**
      * Returns the madvertise token
-     *
-     * @param context application context
+     * 
+     * @param context
+     *            application context
      * @return madvertise_token from AndroidManifest.xml or null
      */
     public static String getToken(final Context context, MadvertiseViewCallbackListener listener) {
@@ -207,8 +207,8 @@ public class MadvertiseUtil {
 
         PackageManager packageManager = context.getPackageManager();
         try {
-            ApplicationInfo applicationInfo = packageManager.getApplicationInfo(
-                    context.getPackageName(), PackageManager.GET_META_DATA);
+            ApplicationInfo applicationInfo = packageManager.getApplicationInfo(context.getPackageName(),
+                    PackageManager.GET_META_DATA);
             madvertiseToken = applicationInfo.metaData.getString(MADVERTISE_SITE_TOKEN);
         } catch (Exception e) {
             e.printStackTrace();
@@ -227,45 +227,44 @@ public class MadvertiseUtil {
     }
 
     public static String getApplicationName(final Context context) {
-    	String appName = "";
+        String appName = "";
 
-    	PackageManager packageManager = context.getPackageManager();
-		try {
-			ApplicationInfo applicationInfo = packageManager.getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
-			appName = packageManager.getApplicationLabel(applicationInfo).toString();
-		} catch (NameNotFoundException e) {
-			e.printStackTrace();
-		}
+        PackageManager packageManager = context.getPackageManager();
+        try {
+            ApplicationInfo applicationInfo = packageManager.getApplicationInfo(context.getPackageName(),
+                    PackageManager.GET_META_DATA);
+            appName = packageManager.getApplicationLabel(applicationInfo).toString();
+        } catch (NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
-    	return appName;
+        return appName;
     }
 
     public static String getApplicationVersion(final Context context) {
-    	String appVersion = "";
+        String appVersion = "";
 
-    	PackageManager packageManager = context.getPackageManager();
-		try {
-			PackageInfo packageInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
-			appVersion = packageInfo.versionName;
-		} catch (NameNotFoundException e) {
-			e.printStackTrace();
-		}
+        PackageManager packageManager = context.getPackageManager();
+        try {
+            PackageInfo packageInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
+            appVersion = packageInfo.versionName;
+        } catch (NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
-    	return appVersion;
+        return appVersion;
     }
 
     /**
      * Fetch the address of the enabled interface
-     *
+     * 
      * @return ip address as string
      */
     public static String getLocalIpAddress(MadvertiseViewCallbackListener listener) {
         try {
-            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
-                    .hasMoreElements();) {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
                 NetworkInterface intf = en.nextElement();
-                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr
-                        .hasMoreElements();) {
+                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
                     InetAddress inetAddress = enumIpAddr.nextElement();
                     if (!inetAddress.isLoopbackAddress()) {
                         if (inetAddress instanceof Inet4Address) {
@@ -289,7 +288,7 @@ public class MadvertiseUtil {
 
     /**
      * Returns the MD5 hash for a string.
-     *
+     * 
      * @param input
      * @return md5 hash
      */
@@ -320,8 +319,9 @@ public class MadvertiseUtil {
 
     /**
      * Print all header parameters, just for logging purpose
-     *
-     * @param headers header object
+     * 
+     * @param headers
+     *            header object
      * @return all headers concatenated
      */
     public static String getAllHeadersAsString(final Header[] headers) {
@@ -334,8 +334,9 @@ public class MadvertiseUtil {
 
     /**
      * converts a stream to a string
-     *
-     * @param inputStream stream from the http connection with the ad server
+     * 
+     * @param inputStream
+     *            stream from the http connection with the ad server
      * @return json string from the ad server
      */
     public static String convertStreamToString(final InputStream inputStream) {
@@ -364,21 +365,21 @@ public class MadvertiseUtil {
 
     /**
      * Try to update current location. Non blocking call.
-     *
-     * @param context application context
+     * 
+     * @param context
+     *            application context
      */
     public static void refreshCoordinates(final Context context) {
-    	MadvertiseUtil.logMessage(null, Log.DEBUG, "Trying to refresh location");
+        MadvertiseUtil.logMessage(null, Log.DEBUG, "Trying to refresh location");
 
         if (context == null) {
-           	MadvertiseUtil.logMessage(null, Log.DEBUG, "Context not set - quit location refresh");
+            MadvertiseUtil.logMessage(null, Log.DEBUG, "Context not set - quit location refresh");
             return;
         }
 
         // check if we need a regular update
-        if ((sLocationUpdateTimestamp + MadvertiseUtil.SECONDS_TO_REFRESH_LOCATION * 1000) > System
-                .currentTimeMillis()) {
-        	MadvertiseUtil.logMessage(null, Log.DEBUG, "It's not time yet for refreshing the location");
+        if ((sLocationUpdateTimestamp + MadvertiseUtil.SECONDS_TO_REFRESH_LOCATION * 1000) > System.currentTimeMillis()) {
+            MadvertiseUtil.logMessage(null, Log.DEBUG, "It's not time yet for refreshing the location");
             return;
         }
 
@@ -387,23 +388,25 @@ public class MadvertiseUtil {
             // paused
             if ((sLocationUpdateTimestamp + MadvertiseUtil.SECONDS_TO_REFRESH_LOCATION * 1000) > System
                     .currentTimeMillis()) {
-            	MadvertiseUtil.logMessage(null, Log.DEBUG, "Another thread updated the loation already");
+                MadvertiseUtil.logMessage(null, Log.DEBUG, "Another thread updated the loation already");
                 return;
             }
 
-            boolean permissionCoarseLocation = MadvertiseUtil.checkPermissionGranted(android.Manifest.permission.ACCESS_COARSE_LOCATION, context);
-            boolean permissionFineLocation = MadvertiseUtil.checkPermissionGranted(android.Manifest.permission.ACCESS_FINE_LOCATION, context);
+            boolean permissionCoarseLocation = MadvertiseUtil.checkPermissionGranted(
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION, context);
+            boolean permissionFineLocation = MadvertiseUtil.checkPermissionGranted(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION, context);
 
             // return (null) if we do not have any permissions
             if (!permissionCoarseLocation && !permissionFineLocation) {
-            	MadvertiseUtil.logMessage(null, Log.DEBUG, "No permissions for requesting the location");
+                MadvertiseUtil.logMessage(null, Log.DEBUG, "No permissions for requesting the location");
                 return;
             }
 
             // return (null) if we can't get a location manager
             LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
             if (locationManager == null) {
-            	MadvertiseUtil.logMessage(null, Log.DEBUG, "Unable to fetch a location manger");
+                MadvertiseUtil.logMessage(null, Log.DEBUG, "Unable to fetch a location manger");
                 return;
             }
 
@@ -425,7 +428,7 @@ public class MadvertiseUtil {
 
             // still no provider, return (null)
             if (provider == null) {
-            	MadvertiseUtil.logMessage(null, Log.DEBUG, "Unable to fetch a location provider");
+                MadvertiseUtil.logMessage(null, Log.DEBUG, "Unable to fetch a location provider");
                 return;
             }
 
@@ -435,8 +438,8 @@ public class MadvertiseUtil {
             sLocationUpdateTimestamp = System.currentTimeMillis();
             locationManager.requestLocationUpdates(provider, 0, 0, new LocationListener() {
                 @Override
-				public void onLocationChanged(Location location) {
-                	MadvertiseUtil.logMessage(null, Log.DEBUG, "Refreshing location");
+                public void onLocationChanged(Location location) {
+                    MadvertiseUtil.logMessage(null, Log.DEBUG, "Refreshing location");
                     sCurrentLocation = location;
                     sLocationUpdateTimestamp = System.currentTimeMillis();
                     // stop draining battery life
@@ -445,15 +448,15 @@ public class MadvertiseUtil {
 
                 // not used yet
                 @Override
-				public void onProviderDisabled(String provider) {
+                public void onProviderDisabled(String provider) {
                 }
 
                 @Override
-				public void onProviderEnabled(String provider) {
+                public void onProviderEnabled(String provider) {
                 }
 
                 @Override
-				public void onStatusChanged(String provider, int status, Bundle extras) {
+                public void onStatusChanged(String provider, int status, Bundle extras) {
                 }
             }, context.getMainLooper());
         }
@@ -471,10 +474,9 @@ public class MadvertiseUtil {
     }
 
     /**
-     * Generate a User-Agent used in HTTP request to pick an ad. Source used
-     * from Android source code
+     * Generate a User-Agent used in HTTP request to pick an ad. Source used from Android source code
      * "frameworks/base/core/java/android/webkit/WebSettings.java"
-     *
+     * 
      * @return
      */
     public static String getUA() {
@@ -529,20 +531,38 @@ public class MadvertiseUtil {
     }
 
     /**
-     * Simple logging helper to prevent producing duplicate code blocks.
-     * Log-Message is only printed to LogCat if logging is enabled in MadUtils
-     * and message is logable with specified tag and level.
-     *
-     * @param tag use a given tag for logging or use default tag if nil. Default
-     *            tag can be defined in MadUtil class.
-     * @param level log level from {@link android.util.Log}
+     * Simple logging helper to prevent producing duplicate code blocks. Log-Message is only printed to LogCat if
+     * logging is enabled in MadUtils and message is logable with specified tag and level.
+     * 
+     * @param tag
+     *            use a given tag for logging or use default tag if nil. Default tag can be defined in MadUtil class.
+     * @param level
+     *            log level from {@link android.util.Log}
      * @param message
      * @see android.util.Log
      */
     public static void logMessage(final String tag, final int level, String message) {
+        logMessage(tag, level, message, null);
+    }
+
+    /**
+     * Simple logging helper to prevent producing duplicate code blocks. Log-Message is only printed to LogCat if
+     * logging is enabled in MadUtils and message is logable with specified tag and level.
+     * 
+     * @param tag
+     *            use a given tag for logging or use default tag if nil. Default tag can be defined in MadUtil class.
+     * @param level
+     *            log level from {@link android.util.Log}
+     * @param message
+     *            message to log
+     * @param throwable
+     *            exception to log
+     * @see android.util.Log
+     */
+    public static void logMessage(final String tag, final int level, String message, Throwable throwable) {
         String logTag = tag;
         if (!PRINT_LOG) {
-        	return;
+            return;
         }
 
         if (tag == null) {
@@ -553,11 +573,15 @@ public class MadvertiseUtil {
             message = "";
         }
 
-        String fullClassName = Thread.currentThread().getStackTrace()[3].getClassName();
+        StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[3];
+        String fullClassName = stackTraceElement.getClassName();
         String className = fullClassName.substring(fullClassName.lastIndexOf(".") + 1);
-        int lineNumber = Thread.currentThread().getStackTrace()[3].getLineNumber();
+        int lineNumber = stackTraceElement.getLineNumber();
 
         String logMessage = "(" + className + ":" + lineNumber + ") : " + message;
+        if (throwable != null) {
+            logMessage += '\n' + Log.getStackTraceString(throwable);
+        }
         Log.println(level, logTag, logMessage);
     }
 
@@ -566,29 +590,29 @@ public class MadvertiseUtil {
     }
 
     public static String getJSONValue(JSONObject json, String key) throws JSONException {
-    	MadvertiseUtil.checkEmptyJson(json,  key);
-    	return json.has(key) ? json.getString(key) : "";
+        MadvertiseUtil.checkEmptyJson(json, key);
+        return json.has(key) ? json.getString(key) : "";
     }
 
     public static JSONArray getJSONArray(JSONObject json, String key) throws JSONException {
-    	MadvertiseUtil.checkEmptyJson(json,  key);
-    	return json.has(key) ? json.getJSONArray(key) : new JSONArray();
+        MadvertiseUtil.checkEmptyJson(json, key);
+        return json.has(key) ? json.getJSONArray(key) : new JSONArray();
     }
 
     public static JSONObject getJSONObject(JSONObject json, String key) throws JSONException {
-    	MadvertiseUtil.checkEmptyJson(json,  key);
-    	return json.has(key) ? json.getJSONObject(key) : null;
+        MadvertiseUtil.checkEmptyJson(json, key);
+        return json.has(key) ? json.getJSONObject(key) : null;
     }
 
     public static boolean getJSONBoolean(JSONObject json, String key) throws JSONException {
-    	MadvertiseUtil.checkEmptyJson(json,  key);
-    	return json.has(key) ? json.getBoolean(key) : false;
+        MadvertiseUtil.checkEmptyJson(json, key);
+        return json.has(key) ? json.getBoolean(key) : false;
     }
 
     private static void checkEmptyJson(JSONObject json, String key) throws JSONException {
-    	if (json == null || key.equals("")) {
-    		throw new JSONException("Empty JSON or key");
-    	}
+        if (json == null || key.equals("")) {
+            throw new JSONException("Empty JSON or key");
+        }
     }
 
     // code for getting app names
@@ -600,16 +624,18 @@ public class MadvertiseUtil {
         private String versionName = "";
         private int versionCode = 0;
         @SuppressWarnings("unused")
-		private Drawable icon;
+        private Drawable icon;
+
         private void prettyPrint() {
-            MadvertiseUtil.logMessage(null, Log.DEBUG, appname + "\t " + pname + "\t " + versionName + "\t " + versionCode);
+            MadvertiseUtil.logMessage(null, Log.DEBUG, appname + "\t " + pname + "\t " + versionName + "\t "
+                    + versionCode);
         }
     }
 
     public static ArrayList<PInfo> getPackages(Context c) {
         ArrayList<PInfo> apps = MadvertiseUtil.getInstalledApps(false, c); /* false = no system packages */
         final int max = apps.size();
-        for (int i=0; i<max; i++) {
+        for (int i = 0; i < max; i++) {
             apps.get(i).prettyPrint();
         }
         return apps;
@@ -618,10 +644,10 @@ public class MadvertiseUtil {
     private static ArrayList<PInfo> getInstalledApps(boolean getSysPackages, Context c) {
         ArrayList<PInfo> res = new ArrayList<PInfo>();
         List<PackageInfo> packs = c.getPackageManager().getInstalledPackages(0);
-        for(int i=0;i<packs.size();i++) {
+        for (int i = 0; i < packs.size(); i++) {
             PackageInfo p = packs.get(i);
             if ((!getSysPackages) && (p.versionName == null)) {
-                continue ;
+                continue;
             }
             PInfo newInfo = new PInfo();
             newInfo.appname = p.applicationInfo.loadLabel(c.getPackageManager()).toString();
