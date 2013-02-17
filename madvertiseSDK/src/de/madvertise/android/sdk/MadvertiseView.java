@@ -986,7 +986,15 @@ public class MadvertiseView extends FrameLayout {
         }
     }
     
-    
+    /**
+     * Gets the current banner type.
+     * 
+     * @return See {@link MadvertiseUtil} constants for valid values
+     */
+    public String getBannerType() {
+        return mBannerType;
+    }
+
     /**
      * Sets the banner type.
      * 
