@@ -515,12 +515,7 @@ public class MadvertiseView extends FrameLayout {
             MadvertiseUtil.logMessage(null, Log.DEBUG, "Refresh intervall must be higher than 60");
         }
 
-        try {
-            calculateBannerDimensions();
-        } catch (JSONException e) {
-            // this should never happen
-            e.printStackTrace();
-        }
+        calculateBannerDimensions();
 
         MadvertiseUtil.logMessage(null, Log.DEBUG, "Using following attributes values:");
         MadvertiseUtil.logMessage(null, Log.DEBUG, " testMode = " + mTestMode);
@@ -636,7 +631,7 @@ public class MadvertiseView extends FrameLayout {
                 try {
                     urlEncodedEntity = new UrlEncodedFormEntity(parameterList);
                 } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
 
                 postRequest.setEntity(urlEncodedEntity);
@@ -711,32 +706,28 @@ public class MadvertiseView extends FrameLayout {
                         }
                     } catch (ClientProtocolException e) {
                         MadvertiseUtil.logMessage(null, Log.DEBUG,
-                                "Error in HTTP request / protocol");
+                                "Error in HTTP request / protocol", e);
                         if (mCallbackListener != null) {
                             mCallbackListener.onError(e);
                         }
-                        e.printStackTrace();
                     } catch (IOException e) {
                         MadvertiseUtil.logMessage(null, Log.DEBUG,
-                                "Could not receive a http response on an ad request");
+                                "Could not receive a http response on an ad request", e);
                         if (mCallbackListener != null) {
                             mCallbackListener.onError(e);
                         }
-                        e.printStackTrace();
                     } catch (JSONException e) {
                         MadvertiseUtil.logMessage(null, Log.DEBUG,
-                                "Could not parse json object");
+                                "Could not parse json object", e);
                         if (mCallbackListener != null) {
                             mCallbackListener.onError(e);
                         }
-                        e.printStackTrace();
                     } catch (Exception e) {
                         MadvertiseUtil.logMessage(null, Log.DEBUG,
-                                "Could not receive a http response on an ad request");
+                                "Could not receive a http response on an ad request", e);
                         if (mCallbackListener != null) {
                             mCallbackListener.onError(e);
                         }
-                        e.printStackTrace();
                     } finally {
                         if (inputStream != null) {
                             try {
@@ -761,7 +752,7 @@ public class MadvertiseView extends FrameLayout {
         }
     };
 
-    private void calculateBannerDimensions() throws JSONException {
+    private void calculateBannerDimensions() {
     	if (mCurrentAd == null || mCurrentAd.getBannerType() == null) {
     		return;
     	}
@@ -992,6 +983,25 @@ public class MadvertiseView extends FrameLayout {
         if (mMraidView != null) {
             mMraidView.setPlacementType(placementType);
         }
+    }
+    
+    /**
+     * Gets the current banner type.
+     * 
+     * @return See {@link MadvertiseUtil} constants for valid values
+     */
+    public String getBannerType() {
+        return mBannerType;
+    }
+
+    /**
+     * Sets the banner type.
+     * 
+     * @param bannerType
+     *            See {@link MadvertiseUtil} constants for valid values
+     */
+    public void setBannerType(String bannerType) {
+        mBannerType = bannerType;
     }
 
     /**
