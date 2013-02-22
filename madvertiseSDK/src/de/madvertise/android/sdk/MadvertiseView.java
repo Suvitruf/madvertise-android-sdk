@@ -572,7 +572,7 @@ public class MadvertiseView extends FrameLayout {
                 parameterList.add(new BasicNameValuePair("ip", MadvertiseUtil.getLocalIpAddress(mCallbackListener)));
                 parameterList.add(new BasicNameValuePair("format", "json"));
                 parameterList.add(new BasicNameValuePair("requester", "android_sdk"));
-                parameterList.add(new BasicNameValuePair("version", "3.1.2"));
+                parameterList.add(new BasicNameValuePair("version", "3.1.3"));
                 parameterList.add(new BasicNameValuePair("banner_type", mBannerType));
                 parameterList.add(new BasicNameValuePair("deliver_only_text", Boolean
                         .toString(mDeliverOnlyText)));
